@@ -15,6 +15,12 @@ Selector::~Selector()
 {
 	//delete mPaths;
 	if (mImageData) delete mImageData;
+
+	// Delete any images layers
+	for (int x = 0; x < mPaths.size(); x++)
+	{
+		if (mPaths[x].imageData) delete mPaths[x].imageData;
+	}
 }
 
 bool Selector::sContains(boost::filesystem::path _path, std::string pre)
@@ -136,15 +142,17 @@ bool Selector::processInput(std::vector<boost::filesystem::path> input)
 ImageData Selector::loadWithCV(boost::filesystem::path _path)
 {
 	cv::Mat image = cv::imread(_path.string(), CV_LOAD_IMAGE_UNCHANGED);
-	if (!image.data) std::cout << "FAILURE TO OPEN" << std::endl;
+	
 
 	ImageData ret;
 	ret.width = image.size().width;
 	ret.height = image.size().height;
 	ret.layers = image.channels();
-	ret.bSuccess = image.data ? true : false;
-	ret.imageData = new unsigned char[ret.height * ret.width * ret.layers];
-	for (int i = 0; i < ret.height * ret.width * ret.layers; i++)
+	if (!image.data) ret.bSuccess = false; else ret.bSuccess = true;
+	
+	uint32_t sizeImage = ret.height * ret.width * ret.layers;
+	ret.imageData = new unsigned char[sizeImage];
+	for (uint32_t i = 0; i < sizeImage; i++)
 	{
 		ret.imageData[i] = image.data[i];
 	}
@@ -163,9 +171,7 @@ void Selector::packImage()
 	mImageData = new unsigned char[iDim];
 
 	// Take the first image and fill X channels with it
-	int x, y, z;
-	uint32_t workingLayers;
-	int layersProcessed = 0, layersTemp;
+	uint32_t x, y, z, workingLayers,layersProcessed = 0, layersTemp;
 
 	for (x = 0; x < mPaths.size(); x++)
 	{
@@ -175,13 +181,9 @@ void Selector::packImage()
 		{
 			for (z = 0; z < i2DSize; z++)
 			{
-				//std::cout << mLayersTaken << std::endl
-				//	<< workingLayers << std::endl
-				//	<< workingLayers + layersTemp << std::endl
-				//	<< y << std::endl
-				//	<< z + y * mLayersTaken << std::endl;
+
 				mImageData[y + z * mLayersTaken] = mPaths[x].imageData[y - layersTemp + z * workingLayers];
-				//mImageData[z + y * mLayersTaken] = 255;
+
 			}
 			layersProcessed++;
 		}
