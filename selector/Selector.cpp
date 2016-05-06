@@ -180,7 +180,7 @@ void Selector::packImage()
 				//	<< workingLayers + layersTemp << std::endl
 				//	<< y << std::endl
 				//	<< z + y * mLayersTaken << std::endl;
-				mImageData[y + z * mLayersTaken] = mPaths[x].imageData[y - layersProcessed + z * workingLayers];
+				mImageData[y + z * mLayersTaken] = mPaths[x].imageData[y - layersTemp + z * workingLayers];
 				//mImageData[z + y * mLayersTaken] = 255;
 			}
 			layersProcessed++;
