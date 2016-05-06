@@ -1,2 +1,1 @@
-# Remi
-Stitches
+# Project Remi
